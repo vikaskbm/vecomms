@@ -2,17 +2,18 @@ from django.conf import settings
 from django.db import models
 
 
-CATEGORY_CHOICES =  (
+CATEGORY_CHOICES = (
     ('S', 'Shirt'),
     ('SW', 'Sports Wear'),
     ('OW', 'Out Wear'),
-) 
+)
 
-LABEL_CHOICES =  (
+LABEL_CHOICES = (
     ('p', 'primary'),
     ('s', 'secondary'),
     ('d', 'danger'),
-) 
+)
+
 
 class Item(models.Model):
     title = models.CharField(max_length=100)
@@ -32,11 +33,12 @@ class OrderItem(models.Model):
 
 
 class Order(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL,
+                             on_delete=models.CASCADE)
     items = models.ManyToManyField(OrderItem)
     start_date = models.DateTimeField(auto_now_add=True)
     order_date = models.DateTimeField()
     ordered = models.BooleanField(default=False)
-    
+
     def __str__(self):
         return self.user.username
