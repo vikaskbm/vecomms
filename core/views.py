@@ -1,9 +1,9 @@
 from django.shortcuts import render
 from .models import Item
+from django.views.generic import ListView, DetailView
 
 
-def item_list(request):
-    context = {
-        'items': Item.objects.all()
-    }
-    return render(request, 'home-page.html', context=context)
+class HomeView(ListView):
+    model = Item
+    template_name = 'home.html'
+
