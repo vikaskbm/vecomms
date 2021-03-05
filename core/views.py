@@ -1,6 +1,9 @@
-from django.shortcuts import render
-from .models import Item
+from django.shortcuts import render, get_object_or_404, redirect
 from django.views.generic import ListView, DetailView
+from django.utils import timezone
+from django.contrib import messages
+
+from .models import Item, OrderItem, Order
 
 
 class HomeView(ListView):
@@ -15,3 +18,4 @@ class ItemDetailView(DetailView):
 
 def checkout(request):
     return render(request, "checkout.html")
+ 
