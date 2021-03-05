@@ -50,9 +50,22 @@
 <body>
     {% include "navbar.html" %}
 
+    {% if messages %}
+      <div class="mt-5 pt-4">
+        {% for message in messages %}
+        <div class="alert alert-dismissible fade show alert-{{message.tags}}" role="alert" data-mdb-color="{{message.tags}}">
+          {{ message }}
+          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span area-hidden="true">&times;</span>
+          </button>
+        </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
     {% block content %}
     {% endblock content %}
-        
+    
     {% include "footer.html" %}
     {% include "scripts.html" %}
 
