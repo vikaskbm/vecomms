@@ -34,9 +34,12 @@ class ItemDetailView(DetailView):
     template_name = 'product.html'
 
 
-def checkout(request):
-    return render(request, "checkout.html")
+class CheckOutView(View):
+    def get(self, *args, **kwargs):
+        return render(self.request, "checkout.html")
 
+    def post(self, *args, **kwargs):
+        return render(self.request, "checkout.html")
 
 @login_required
 def add_to_cart(request, slug):
