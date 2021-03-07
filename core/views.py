@@ -7,6 +7,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 
 from .models import Item, OrderItem, Order
+from .forms import CheckoutForm
 
 
 class HomeView(ListView):
@@ -36,10 +37,18 @@ class ItemDetailView(DetailView):
 
 class CheckOutView(View):
     def get(self, *args, **kwargs):
-        return render(self.request, "checkout.html")
+        form = CheckoutForm()
+        context = {
+            'form': form
+        }
+        return render(self.request, "checkout.html", context=context)
 
     def post(self, *args, **kwargs):
-        return render(self.request, "checkout.html")
+        form = CheckoutForm(self.request.POST or None)
+        if form.is_valid():
+            print("Form is valid")
+            return redirect("core:checkout.html")
+
 
 @login_required
 def add_to_cart(request, slug):

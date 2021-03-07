@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-
+{% load crispy_forms_tags %}
 {% block content %}
 <!--Main layout-->
 <main class="mt-5 pt-4">
@@ -16,6 +16,12 @@
 
         <!--Card-->
         <div class="card">
+
+          <form>
+            {% csrf_token %}
+            {{ form | crispy}}
+            <button class="btn btn-primary" type="submit">Checkout</button>
+          </form>
 
           <!--Card content-->
           <form class="card-body">
