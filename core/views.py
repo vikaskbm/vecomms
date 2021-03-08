@@ -75,6 +75,13 @@ class CheckOutView(View):
             messages.error(self.request, "You do not have an active user")
             return redirect("/")   
 
+
+class PaymentView(View):
+    def get(self, *args, **kwargs):
+        return render(self.request, 'payment.html')
+
+
+
 @login_required
 def add_to_cart(request, slug):
     item = get_object_or_404(Item, slug=slug)
