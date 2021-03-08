@@ -6,7 +6,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 
-from .models import Item, OrderItem, Order
+from .models import Item, OrderItem, Order, BillingAddress
 from .forms import CheckoutForm
 
 
@@ -44,13 +44,36 @@ class CheckOutView(View):
         return render(self.request, "checkout.html", context=context)
 
     def post(self, *args, **kwargs):
-        form = CheckoutForm(self.request.POST or None) 
-        if form.is_valid(): 
+        form = CheckoutForm(self.request.POST or None)
+        try:
+            order = Order.objects.get(user=self.request.user, ordered=False)
+            if form.is_valid(): 
+                address_line_1 = form.cleaned_data.get('address_line_1')
+                address_line_2 = form.cleaned_data.get('address_line_2')
+                country = form.cleaned_data.get('country')
+                zip_code = form.cleaned_data.get('zip_code')
+                # TODO: add functionality for these fields
+                # same_shipping_address = form.cleaned_data.get('same_shipping_address')
+                # save_info = form.cleaned_data.get('save_info')
+                payment_option = form.cleaned_data.get('payment_option')
+                billing_address = BillingAddress(
+                    user=self.request.user,
+                    address_line_1=address_line_1,
+                    address_line_2=address_line_2,
+                    country=country,
+                    zip_code=zip_code
+                )
+                billing_address.save()
+                order.billing_address = billing_address
+                order.save()
+                # TODO: add a redirect to selected payment option
+                return redirect("core:checkout")
             
-            return redirect("core:checkout")
-        
-        messages.warning(self.request, "Failed to checkout ")
-        return redirect("core:checkout")        
+            messages.warning(self.request, "Failed to checkout ")
+            return redirect("core:checkout")     
+        except ObjectDoesNotExist:
+            messages.error(self.request, "You do not have an active user")
+            return redirect("/")   
 
 @login_required
 def add_to_cart(request, slug):
@@ -69,7 +92,7 @@ def add_to_cart(request, slug):
             order_item.quantity += 1
             order_item.save()
             messages.info(request, "Item quantity was updated")
-            return redirect('core:order_summary')
+            return redirect('core:order_summary') 
         else:
             order.items.add(order_item)
             messages.info(request, "This item was added to your cart")
