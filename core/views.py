@@ -1,13 +1,21 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from django.views.generic import ListView, DetailView, View
+from django.views.generic import ListView, DetailView, TemplateView
+from django.views import View
+from django.conf import settings
 from django.utils import timezone
 from django.contrib import messages
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.http import JsonResponse
+import json
 
 from .models import Item, OrderItem, Order, BillingAddress
 from .forms import CheckoutForm
+
+import stripe
+
+stripe.api_key = settings.STRIPE_SECRET_KEY
 
 
 class HomeView(ListView):
@@ -73,13 +81,43 @@ class CheckOutView(View):
             return redirect("core:checkout")     
         except ObjectDoesNotExist:
             messages.error(self.request, "You do not have an active user")
-            return redirect("/")   
+            return redirect("core:order_summary")   
 
 
-class PaymentView(View):
-    def get(self, *args, **kwargs):
-        return render(self.request, 'payment.html')
+class PaymentLandingView(TemplateView):
+    template_name = 'payment.html'
 
+    def get_context_data(self, **kwargs):
+        order = Order.objects.get(user=self.request.user, ordered=False)
+        print(order)
+        context =  super(PaymentLandingView, self).get_context_data(**kwargs)
+        context.update({
+            "order": order,
+            "STRIPE_PUBLIC_KEY": settings.STRIPE_PUBLIC_KEY
+        })
+        return context
+
+
+class PaymentView(View): 
+    def post(self, request, *args, **kwargs):
+        try:
+            order_id = self.kwargs["pk"]
+            order = Order.objects.get(user=self.request.user, ordered=False, id=order_id)
+            print(order)
+            intent = stripe.PaymentIntent.create(
+                amount=order.get_total() * 100,
+                currency='usd' 
+            )
+            print(intent)
+            # order.ordered = True
+            return JsonResponse({
+                'clientSecret': intent['client_secret']
+            })
+
+        except Exception as e:
+            return JsonResponse({"error" :str(e)})
+
+            
 
 
 @login_required
