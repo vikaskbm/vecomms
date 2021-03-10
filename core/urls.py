@@ -23,5 +23,5 @@ urlpatterns = [
     path('remove-from-cart/<slug>/', remove_from_cart, name='remove_from_cart'),
     path('remove-single-item-from-cart/<slug>/', remove_single_item_from_cart, name='remove_single_item_from_cart'),
     path('payment/<payment_option>/', PaymentLandingView.as_view(), name='payment'),
-    path('create_payment_intent/<pk>/', PaymentView.as_view(), name='create_payment_intent'),
+    path('create_payment_intent/', PaymentView.as_view(), name='create_payment_intent'),
 ]

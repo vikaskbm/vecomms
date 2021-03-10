@@ -88,8 +88,7 @@ class PaymentLandingView(TemplateView):
     template_name = 'payment.html'
 
     def get_context_data(self, **kwargs):
-        order = Order.objects.get(user=self.request.user, ordered=False)
-        print(order)
+        order = Order.objects.get(user=self.request.user, ordered=False) 
         context =  super(PaymentLandingView, self).get_context_data(**kwargs)
         context.update({
             "order": order,
@@ -101,23 +100,25 @@ class PaymentLandingView(TemplateView):
 class PaymentView(View): 
     def post(self, request, *args, **kwargs):
         try:
-            order_id = self.kwargs["pk"]
-            order = Order.objects.get(user=self.request.user, ordered=False, id=order_id)
-            print(order)
+            print("HELLO")
+            order = Order.objects.get(user=self.request.user, ordered=False)
+            print("HELLO")
             intent = stripe.PaymentIntent.create(
-                amount=order.get_total() * 100,
+                amount=100,
                 currency='usd' 
             )
-            print(intent)
+            print("HELLO")
+            print(intent['client_secret'])
+            
             # order.ordered = True
             return JsonResponse({
-                'clientSecret': intent['client_secret']
-            })
+                "clientSecret": intent['client_secret']
+            }) 
 
         except Exception as e:
-            return JsonResponse({"error" :str(e)})
+            print("BYE")
+            return JsonResponse({ "error" :str(e) })
 
-            
 
 
 @login_required
@@ -212,4 +213,4 @@ def remove_single_item_from_cart(request, slug):
     else:
         # order does not exist
         messages.info(request, "You do not have an active order")
-        return redirect('core:product', slug=slug)
+        return redirect('core:product', slug=slug) 
