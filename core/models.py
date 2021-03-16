@@ -92,6 +92,11 @@ class Payment(models.Model):
     def __str__(self):
         return self.user.username
 
+class Coupon(models.Model):
+    code = models.CharField(max_length=15)
+
+    def __str__(self):
+        return self.code
 
 class Order(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL,
@@ -112,3 +117,4 @@ class Order(models.Model):
             total += item.get_final_price()
         
         return total
+
