@@ -10,7 +10,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse
 import json
 
-from .models import Item, OrderItem, Order, BillingAddress
+from .models import Item, OrderItem, Order, BillingAddress, Payment
 from .forms import CheckoutForm
 
 import stripe
@@ -75,7 +75,13 @@ class CheckOutView(View):
                 order.billing_address = billing_address
                 order.save()
                 # TODO: add a redirect to selected payment option
-                return redirect("core:checkout")
+                if payment_option == 'S':
+                    return redirect("core:payment", payment_option="stripe")
+                elif payment_option == 'P':
+                    return redirect("core:payment", payment_option="paypal")
+                else:
+                    messages.warning(self.request, "Invalid paymemnt option selected")
+                    return redirect("core:checkout")
             
             messages.warning(self.request, "Failed to checkout ")
             return redirect("core:checkout")     
@@ -98,16 +104,29 @@ class PaymentLandingView(TemplateView):
 
 
 class PaymentView(View): 
-    def post(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs): 
         try: 
             order = Order.objects.get(user=self.request.user, ordered=False ) 
-            intent = stripe.PaymentIntent.create(
-                amount=100,
-                currency='usd' 
-            ) 
-            print(intent['client_secret'])
+            amount = int(order.get_total() * 100)
             
+            intent = stripe.PaymentIntent.create(
+                amount=amount,
+                currency='usd',
+                description=f'Payment for order {order}'
+            )  
+
+            # create payment
+            payment = Payment()
+            payment.stripe_charge_id = intent.id
+            payment.user = self.request.user
+            payment.amount = order.get_total()
+            payment.save()
+
+            # assign payment to order
+            # order.payment = payment
             # order.ordered = True
+            # order.save()
+
             return JsonResponse({
                 "clientSecret": intent['client_secret']
             }) 
