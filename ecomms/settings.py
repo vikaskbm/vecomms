@@ -5,9 +5,11 @@ ENVIRONMENT = os.getenv('ENVIRONMENT', 'development')
 DEBUG = True
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = '-05sgp9!deq=q1nltm@^^2cc+v29i(tyybv3v2t77qi66czazj'
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['vecomms.herokuapp.com']
+
 
 INSTALLED_APPS = [
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -66,6 +68,9 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
+#  Add configuration for static files storage using whitenoise
+STATICFILES_STORAGE = 'whitenoise.django.GzipManifestStaticFilesStorage'
+
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
@@ -103,3 +108,8 @@ LOGIN_REDIRECT_URL = "/"
 # STRIPE
 STRIPE_PUBLIC_KEY = 'pk_test_51IShg4BmQD59unVaSbxKARlBJIsHbNTEXJFVRnlu7bWBMGH0DwupnvjRjZyxZEvJlZlBafp54JfZzJ4EmWo79lhS00jEEkMx1O'
 STRIPE_SECRET_KEY = 'sk_test_51IShg4BmQD59unVaSukDJ6qpekb4rTRth2vFrEz8kTqB5mtauq9YbuDI7zlH2E41C7wgaPOfXdAB4LllM9lpl0Xz00rgU5FXMS'
+
+
+import dj_database_url 
+prod_db  =  dj_database_url.config(conn_max_age=500)
+DATABASES['default'].update(prod_db)
